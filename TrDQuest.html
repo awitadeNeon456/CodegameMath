@@ -1,0 +1,338 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién quiere ser millonario? - Límites Laterales y al Infinito</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: url("https://upload.wikimedia.org/wikipedia/commons/f/ff/Milonario_El_Salvador.jpg");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        #game-container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #000033, #330033);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #ff00ff, 4px 4px #00ffff;
+        }
+        #question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #ffff00;
+        }
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #000066;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.3s ease;
+        }
+        .answer-btn:hover {
+            background-color: #0000aa;
+            box-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        }
+        #lifelines {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .lifeline-btn {
+            padding: 10px;
+            margin: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #660066;
+            color: #ffff00;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.3s ease;
+        }
+        .lifeline-btn:hover:not(:disabled) {
+            background-color: #aa00aa;
+            box-shadow: 0 0 5px #ffff00, 0 0 10px #ffff00;
+        }
+        .lifeline-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #timer {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ff0000;
+        }
+        #image-container {
+            margin-top: 20px;
+        }
+        #image-container img {
+            max-width: 100%;
+            max-height: 200px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+        }
+        #score-table {
+            font-size: 12px;
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            display: inline-block;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        #score-table h2 {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+        }
+        #score-table p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>¿Quién quiere ser millonario?</h1>
+        <div id="timer">Tiempo: 02:00</div>
+        <div id="image-container">
+            <img id="question-image" src="" alt="Imagen de la pregunta">
+        </div>
+        <div id="answers"></div>
+        <div id="lifelines">
+            <button class="lifeline-btn" id="fifty-fifty">50:50</button>
+            <button class="lifeline-btn" id="phone-friend">Llamar amigo</button>
+            <button class="lifeline-btn" id="ask-audience">Preguntar público</button>
+            <button class="lifeline-btn" id="random-help">Ayuda aleatoria</button>
+        </div>
+    </div>
+    <div id="score-table">
+        <h2>Puntuación</h2>
+        <p>Correctas: <span id="correct-answers">0</span></p>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                image: "https://i.postimg.cc/KzsvMZYq/Captura-de-pantalla-2024-09-16-140956.png",
+                answers: ["0", "1", "∞", "No existe"],
+                correct: 1
+            },
+            {
+                image: "https://i.postimg.cc/T33LdrWY/Captura-de-pantalla-2024-09-16-141148.png",
+                answers: ["3", "2", "0", "1"],
+                correct: 0
+            },
+            {
+                image: "https://i.postimg.cc/xTCYmkN9/Captura-de-pantalla-2024-09-16-141555.png",
+                answers: ["0", "1", "infinito", "menos infinito"],
+                correct: 3
+            },
+            {
+                image: "https://i.postimg.cc/632bD2hM/Captura-de-pantalla-2024-09-16-143232.png",
+                answers: ["0", "2", "4", "No existe"],
+                correct: 2
+            },
+            {
+                image: "https://i.postimg.cc/rsRQv0V2/Captura-de-pantalla-2024-09-16-144345.png",
+                answers: ["f(a) = L", "f(a) ≠ L", "f(a) no existe", "No se puede determinar"],
+                correct: 0
+            },
+            {
+                image: "https://i.postimg.cc/k479jBws/Captura-de-pantalla-2024-09-17-161320.png",
+                answers: ["0", "1", "Infinito", "No existe"],
+                correct: 0
+            },            
+            {
+                image: "https://i.postimg.cc/jj4YJRK7/Captura-de-pantalla-2024-09-17-162016.png",
+                answers: ["1", "2", "3", "4"],
+                correct: 3
+            }
+        ];
+
+   let currentQuestion = 0;
+    let timer;
+    let timeLeft = 120; // 2 minutos en segundos
+    let lifelinesUsed = new Set();
+    let correctAnswers = 0;
+    let incorrectAnswers = 0;
+
+    // Sonidos
+    const correctSound = new Audio('https://www.myinstants.com/media/sounds/levelup.mp3');
+    const incorrectSound = new Audio('https://www.myinstants.com/media/sounds/spongebob-disappointed-sound-effect.mp3');
+    const lifelineSound = new Audio('https://www.myinstants.com/media/sounds/quien-quiere-ser-millonario_ScfDHTc.mp3');
+
+    function playSound(sound) {
+        sound.currentTime = 0;
+        sound.play();
+    }
+
+    function startGame() {
+        showQuestion();
+        startTimer();
+    }
+
+    function showQuestion() {
+        if (currentQuestion >= questions.length) {
+            endGame();
+            return;
+        }
+        const q = questions[currentQuestion];
+        document.getElementById('question-image').src = q.image;
+        const answersContainer = document.getElementById('answers');
+        answersContainer.innerHTML = '';
+        q.answers.forEach((answer, index) => {
+            const button = document.createElement('button');
+            button.textContent = answer;
+            button.className = 'answer-btn';
+            button.onclick = () => checkAnswer(index);
+            answersContainer.appendChild(button);
+        });
+        resetLifelines();
+    }
+
+    function checkAnswer(index) {
+        const correct = questions[currentQuestion].correct;
+        if (index === correct) {
+            playSound(correctSound);
+            correctAnswers++;
+        } else {
+            playSound(incorrectSound);
+            incorrectAnswers++;
+            alert('Has respondido mal.');
+        }
+        document.getElementById('correct-answers').textContent = correctAnswers;
+        setTimeout(() => {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+                resetTimer();
+            } else {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function endGame() {
+        clearInterval(timer);
+        alert(`¡Felicitaciones! Has terminado el juego.\nRespuestas correctas: ${correctAnswers}\nRespuestas incorrectas: ${incorrectAnswers}`);
+        resetGame();
+    }
+
+    function startTimer() {
+        timer = setInterval(() => {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = `Tiempo: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                alert('Se acabó el tiempo. El juego ha terminado.');
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        timeLeft = 120;
+        startTimer();
+    }
+
+    function resetGame() {
+        currentQuestion = 0;
+        timeLeft = 120;
+        clearInterval(timer);
+        lifelinesUsed.clear();
+        correctAnswers = 0;
+        incorrectAnswers = 0;
+        document.getElementById('correct-answers').textContent = correctAnswers;
+        startGame();
+    }
+
+    function resetLifelines() {
+        lifelinesUsed.clear();
+        document.querySelectorAll('.lifeline-btn').forEach(btn => {
+            btn.disabled = false;
+        });
+    }
+
+    document.getElementById('fifty-fifty').addEventListener('click', () => {
+        if (lifelinesUsed.has('fifty-fifty')) return;
+        playSound(lifelineSound);
+        const buttons = document.querySelectorAll('.answer-btn');
+        const correct = questions[currentQuestion].correct;
+        let removed = 0;
+        for (let i = 0; i < buttons.length && removed < 2; i++) {
+            if (i !== correct) {
+                buttons[i].style.display = 'none';
+                removed++;
+            }
+        }
+        lifelinesUsed.add('fifty-fifty');
+        document.getElementById('fifty-fifty').disabled = true;
+    });
+
+    document.getElementById('phone-friend').addEventListener('click', () => {
+        if (lifelinesUsed.has('phone-friend')) return;
+        playSound(lifelineSound);
+        const friendName = prompt("¿A quién quieres llamar?");
+        if (friendName) {
+            alert(`Llamando a ${friendName}...`);
+            // Aquí puedes agregar más lógica si lo deseas
+        }
+        lifelinesUsed.add('phone-friend');
+        document.getElementById('phone-friend').disabled = true;
+    });
+
+    document.getElementById('ask-audience').addEventListener('click', () => {
+        if (lifelinesUsed.has('ask-audience')) return;
+        playSound(lifelineSound);
+        window.open('https://www.menti.com/ale4tdsoxprz');
+        lifelinesUsed.add('ask-audience');
+        document.getElementById('ask-audience').disabled = true;
+    });
+
+    document.getElementById('random-help').addEventListener('click', () => {
+        if (lifelinesUsed.has('random-help')) return;
+        playSound(lifelineSound);
+        const randomTips = [
+            "Intenta eliminar las respuestas que parezcan menos probables.",
+            "Recuerda los conceptos básicos de límites que has aprendido.",
+            "Visualiza el gráfico de la función si es posible.",
+            "Piensa en el comportamiento de la función cerca del punto de interés."
+        ];
+        const randomTip = randomTips[Math.floor(Math.random() * randomTips.length)];
+        alert(`Consejo aleatorio: ${randomTip}`);
+        lifelinesUsed.add('random-help');
+        document.getElementById('random-help').disabled = true;
+    });
+
+    startGame();
+</script>
+</body>
+</html>
